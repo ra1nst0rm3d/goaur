@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/levigross/grequests"
 	"github.com/tidwall/gjson"
@@ -13,6 +15,15 @@ func help() {
 	fmt.Println("Usage:	")
 
 }
+
+func stringToTime(s string) (time.Time, error) {
+	sec, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(sec, 0), nil
+}
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
@@ -31,8 +42,24 @@ func main() {
 	}
 	var json string
 	json = resp.String()
-	count := gjson.Get(json, "resultscount")
-	val := gjson.Get(json, "results.0.ID")
-	println("First ID:", val.String())
+	count := gjson.Get(json, "resultscount").Int()
+	fmt.Println("All results:", count)
+	for i := 0; int64(i) < count; i++ {
+		str := "results." + string(i) + ".Name"
+		fmt.Println(i)
+		fmt.Println("Name:", gjson.Get(json, str))
+		str = "results." + string(i) + ".Version"
+		fmt.Println("Ver.:", gjson.Get(json, str))
+		str = "results." + string(i) + ".OutOfDate"
+		if gjson.Get(json, str).Int() == int64(0) {
+			fmt.Println("OutOfDate: null")
+		} else {
+			timestamp := gjson.Get(json, str).String()
+			fmt.Println("OutOfDate:", stringToTime(timestamp))
+		}
+		fmt.Println(" ")
+	}
+
+	// --------------------------------------------------------------
 
 }
