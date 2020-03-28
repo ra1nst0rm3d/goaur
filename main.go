@@ -51,15 +51,17 @@ func main() {
 		str = "results." + string(i) + ".Version"
 		fmt.Println("Ver.:", gjson.Get(json, str))
 		str = "results." + string(i) + ".OutOfDate"
-		if gjson.Get(json, str).Int() == int64(0) {
+		timestamp := gjson.Get(json, str).String()
+		time, err := stringToTime(timestamp)
+		if err != nil {
 			fmt.Println("OutOfDate: null")
-		} else {
-			timestamp := gjson.Get(json, str).String()
-			fmt.Println("OutOfDate:", stringToTime(timestamp))
 		}
-		fmt.Println(" ")
+		fmt.Println("OutOfDate:", time)
+
 	}
-
+	fmt.Println(" ")
 	// --------------------------------------------------------------
-
+	fmt.Println("Choose once [1-", count, "]:")
+	var i int
+	fmt.Sscan("%d", i)
 }
