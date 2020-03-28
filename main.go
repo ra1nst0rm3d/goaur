@@ -42,26 +42,26 @@ func main() {
 	}
 	var json string
 	json = resp.String()
-	count := gjson.Get(json, "resultscount").Int()
+	count := gjson.Get(json, "resultcount").Int()
 	fmt.Println("All results:", count)
 	for i := 0; int64(i) < count; i++ {
-		str := "results." + string(i) + ".Name"
-		fmt.Println(i)
+		str := "results." + strconv.Itoa(i) + ".Name"
 		fmt.Println("Name:", gjson.Get(json, str))
-		str = "results." + string(i) + ".Version"
+		str = "results." + strconv.Itoa(i) + ".Version"
 		fmt.Println("Ver.:", gjson.Get(json, str))
-		str = "results." + string(i) + ".OutOfDate"
+		str = "results." + strconv.Itoa(i) + ".OutOfDate"
 		timestamp := gjson.Get(json, str).String()
 		time, err := stringToTime(timestamp)
 		if err != nil {
 			fmt.Println("OutOfDate: null")
+		} else {
+			fmt.Println("OutOfDate:", time)
 		}
-		fmt.Println("OutOfDate:", time)
 
 	}
 	fmt.Println(" ")
 	// --------------------------------------------------------------
 	fmt.Println("Choose once [1-", count, "]:")
 	var i int
-	fmt.Sscan("%d", i)
+	fmt.Scanf("%d", &i)
 }
