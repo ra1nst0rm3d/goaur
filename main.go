@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/levigross/grequests"
 	"github.com/tidwall/gjson"
 	"gopkg.in/src-d/go-git.v4"
@@ -65,7 +66,7 @@ func main() {
 	}
 	resp, err = grequests.Get("https://aur.archlinux.org/rpc/", pack)
 	if err != nil {
-		fmt.Println("Failed to send response with error", err)
+		color.Red("Failed to send response with error", err)
 		return
 	}
 	// -------------------------------------------------------
@@ -77,23 +78,28 @@ func main() {
 	for i := 0; int64(i) < count; i++ {
 		fmt.Print(i, ". ")
 		str := "results." + strconv.Itoa(i) + ".Name"
-		fmt.Println("Name:", gjson.Get(json, str))
+		fmt.Print("Name: ")
+		color.Green(gjson.Get(json, str).String())
 		str = "results." + strconv.Itoa(i) + ".Description"
-		fmt.Println("Desc.:", gjson.Get(json, str))
+		fmt.Print("Desc.: ")
+		color.Green(gjson.Get(json, str).String())
 		str = "results." + strconv.Itoa(i) + ".Version"
-		fmt.Println("Ver.:", gjson.Get(json, str))
+		fmt.Print("Ver.: ")
+		color.Green(gjson.Get(json, str).String())
 		str = "results." + strconv.Itoa(i) + ".OutOfDate"
 		timestamp := gjson.Get(json, str).String()
 		time, err := stringToTime(timestamp)
 		if err != nil {
-			fmt.Println("Out of date: null")
+			fmt.Println("Out of date: none")
 		} else {
-			fmt.Println("Out of date:", time)
+			fmt.Print("Out of date: ")
+			color.Red(time.String())
 		}
 		str = "results." + strconv.Itoa(i) + ".LastModified"
 		timestamp = gjson.Get(json, str).String()
 		time, _ = stringToTime(timestamp)
-		fmt.Println("Last modified: ", time)
+		fmt.Print("Last modified: ")
+		color.Green(time.String())
 		fmt.Println()
 	}
 	fmt.Println(" ")
@@ -110,7 +116,8 @@ func main() {
 		Progress: os.Stdout,
 	})
 	if err != nil {
-		fmt.Println("[ERR] Cloning error! Maybe you disconnected from Internet?")
+		color.Red("[ERR] Cloning error! Maybe you disconnected from Internet?")
+		return
 	}
 	// --------------------------------------------------------------
 makepkg:
