@@ -115,7 +115,13 @@ func main() {
 	// --------------------------------------------------------------
 makepkg:
 	os.Chdir(dirname)
-	if proc, err := Start("makepkg", "-i", "-s"); err == nil {
-		proc.Wait()
+	if args[0] == "--resume" {
+		if proc, err := Start("makepkg", "-si", "--nocheck"); err == nil {
+			proc.Wait()
+		}
+	} else {
+		if proc, err := Start("makepkg", "-i", "-s"); err == nil {
+			proc.Wait()
+		}
 	}
 }
