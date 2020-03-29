@@ -122,6 +122,19 @@ func main() {
 	// --------------------------------------------------------------
 makepkg:
 	os.Chdir(dirname)
+	color.Set(color.FgGreen)
+	fmt.Print("Maybe you want to edit PKGBUILD?[y/n] ")
+	color.Unset()
+ret:
+	fmt.Scanf("%s", &url)
+	if url == "y" {
+		if proc, err := Start("nano", "PKGBUILD"); err == nil {
+			proc.Wait()
+		}
+	} else if url != "n" {
+		color.Red("Failed to understand you, retry...")
+		goto ret
+	}
 	if args[0] == "--resume" {
 		if proc, err := Start("makepkg", "-si", "--nocheck"); err == nil {
 			proc.Wait()
