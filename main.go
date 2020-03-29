@@ -17,7 +17,8 @@ const giturl = "https://aur.archlinux.org/"
 
 func help() {
 	fmt.Println("ra1nst0rm3d AUR helper")
-	fmt.Println("Usage:	")
+	fmt.Println("Usage:	name_of_package: Search for name")
+	fmt.Println("--resume			Resume build(don't cloning)")
 
 }
 
@@ -48,24 +49,33 @@ func main() {
 		help()
 		return
 	}
-	pack := &grequests.RequestOptions{
+	var url, json string
+	var i int
+	var count int64
+	var resp *grequests.Response
+	var err error
+	var pack *grequests.RequestOptions
+	if len(args) != 0 && args[0] == "--resume" {
+		goto makepkg
+	}
+	pack = &grequests.RequestOptions{
 		Params: map[string]string{"v": "5",
 			"type": "search",
 			"arg":  args[0]},
 	}
-	resp, err := grequests.Get("https://aur.archlinux.org/rpc/", pack)
+	resp, err = grequests.Get("https://aur.archlinux.org/rpc/", pack)
 	if err != nil {
 		fmt.Println("Failed to send response with error", err)
 		return
 	}
 	// -------------------------------------------------------
-	var json string
 	json = resp.String()
-	count := gjson.Get(json, "resultcount").Int()
+	count = gjson.Get(json, "resultcount").Int()
 	fmt.Println("All results:", count)
 	fmt.Println()
 	// -------------------------------------------------------
 	for i := 0; int64(i) < count; i++ {
+		fmt.Print(i, ". ")
 		str := "results." + strconv.Itoa(i) + ".Name"
 		fmt.Println("Name:", gjson.Get(json, str))
 		str = "results." + strconv.Itoa(i) + ".Description"
@@ -88,15 +98,13 @@ func main() {
 	}
 	fmt.Println(" ")
 	// --------------------------------------------------------------
-	fmt.Print("Choose once [1-", count, "]: ")
-	var i int
+	fmt.Print("Choose once [0-", count-1, "]: ")
 	fmt.Scanf("%d", &i)
 	// --------------------------------------------------------------
 	os.RemoveAll(dirname)
 	os.Mkdir(dirname, 0777)
 	// --------------------------------------------------------------
-
-	url := giturl + gjson.Get(json, "results."+strconv.Itoa(i)+".Name").String() + ".git"
+	url = giturl + gjson.Get(json, "results."+strconv.Itoa(i)+".Name").String() + ".git"
 	_, err = git.PlainClone(dirname, false, &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
@@ -105,6 +113,7 @@ func main() {
 		fmt.Println("[ERR] Cloning error! Maybe you disconnected from Internet?")
 	}
 	// --------------------------------------------------------------
+makepkg:
 	os.Chdir(dirname)
 	if proc, err := Start("makepkg", "-i", "-s"); err == nil {
 		proc.Wait()
