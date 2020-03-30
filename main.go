@@ -1,20 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/levigross/grequests"
 	"github.com/tidwall/gjson"
 	"gopkg.in/src-d/go-git.v4"
 )
 
 const dirname = "/tmp/ra1n-helper"
 const giturl = "https://aur.archlinux.org/"
+const rpc = "https://aur.archlinux.org/rpc/?v=5&type=search&arg="
 
 func help() {
 	fmt.Println("ra1nst0rm3d AUR helper")
@@ -53,24 +55,20 @@ func main() {
 	var url, json string
 	var i int
 	var count int64
-	var resp *grequests.Response
 	var err error
-	var pack *grequests.RequestOptions
+	var response *http.Response
+	buf := new(bytes.Buffer)
 	if len(args) != 0 && args[0] == "--resume" {
 		goto makepkg
 	}
-	pack = &grequests.RequestOptions{
-		Params: map[string]string{"v": "5",
-			"type": "search",
-			"arg":  args[0]},
-	}
-	resp, err = grequests.Get("https://aur.archlinux.org/rpc/", pack)
+	response, err = http.Get(rpc + args[0])
 	if err != nil {
-		color.Red("Failed to send response with error", err)
-		return
+		fmt.Println("[ERR] Cannot connect to RPC interface. Check ur Internet connection")
 	}
+	buf.ReadFrom(response.Body)
+	json = buf.String()
 	// -------------------------------------------------------
-	json = resp.String()
+
 	count = gjson.Get(json, "resultcount").Int()
 	fmt.Println("All results:", count)
 	fmt.Println()
