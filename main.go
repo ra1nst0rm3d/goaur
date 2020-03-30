@@ -11,7 +11,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/tidwall/gjson"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 const dirname = "/tmp/ra1n-helper"
@@ -108,14 +107,8 @@ func main() {
 	os.RemoveAll(dirname)
 	os.Mkdir(dirname, 0777)
 	// --------------------------------------------------------------
-	url = giturl + gjson.Get(json, "results."+strconv.Itoa(i)+".Name").String() + ".git"
-	_, err = git.PlainClone(dirname, false, &git.CloneOptions{
-		URL:      url,
-		Progress: os.Stdout,
-	})
-	if err != nil {
-		color.Red("[ERR] Cloning error! Maybe you disconnected from Internet?")
-		return
+	if proc, err := Start("git", "clone", giturl+gjson.Get(json, "results."+strconv.Itoa(i)+".Name").String()+".git", dirname); err == nil {
+		proc.Wait()
 	}
 	// --------------------------------------------------------------
 makepkg:
