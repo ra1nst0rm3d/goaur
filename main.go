@@ -9,13 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/tidwall/gjson"
 )
 
+// Main constants
 const dirname = "/tmp/ra1n-helper"
 const giturl = "https://aur.archlinux.org/"
 const rpc = "https://aur.archlinux.org/rpc/?v=5&type=search&arg="
+const red = "\u001b[31m"
+const green = "\u001b[32m"
+const reset = "\u001b[0m"
 
 func help() {
 	fmt.Println("ra1nst0rm3d AUR helper")
@@ -76,13 +79,13 @@ func main() {
 		fmt.Print(i, ". ")
 		str := "results." + strconv.Itoa(i) + ".Name"
 		fmt.Print("Name: ")
-		color.Green(gjson.Get(json, str).String())
+		fmt.Println(green + gjson.Get(json, str).String() + reset)
 		str = "results." + strconv.Itoa(i) + ".Description"
 		fmt.Print("Desc.: ")
-		color.Green(gjson.Get(json, str).String())
+		fmt.Println(green + gjson.Get(json, str).String() + reset)
 		str = "results." + strconv.Itoa(i) + ".Version"
 		fmt.Print("Ver.: ")
-		color.Green(gjson.Get(json, str).String())
+		fmt.Println(green + gjson.Get(json, str).String() + reset)
 		str = "results." + strconv.Itoa(i) + ".OutOfDate"
 		timestamp := gjson.Get(json, str).String()
 		time, err := stringToTime(timestamp)
@@ -90,13 +93,13 @@ func main() {
 			fmt.Println("Out of date: none")
 		} else {
 			fmt.Print("Out of date: ")
-			color.Red(time.String())
+			fmt.Println(red + time.String() + reset)
 		}
 		str = "results." + strconv.Itoa(i) + ".LastModified"
 		timestamp = gjson.Get(json, str).String()
 		time, _ = stringToTime(timestamp)
 		fmt.Print("Last modified: ")
-		color.Green(time.String())
+		fmt.Println(green + time.String() + reset)
 		fmt.Println()
 	}
 	fmt.Println(" ")
@@ -113,9 +116,7 @@ func main() {
 	// --------------------------------------------------------------
 makepkg:
 	os.Chdir(dirname)
-	color.Set(color.FgGreen)
-	fmt.Print("Maybe you want to edit PKGBUILD?[y/n] ")
-	color.Unset()
+	fmt.Print(green + "Maybe you want to edit PKGBUILD?[y/n] " + reset)
 ret:
 	fmt.Scanf("%s", &url)
 	if url == "y" {
@@ -123,7 +124,8 @@ ret:
 			proc.Wait()
 		}
 	} else if url != "n" {
-		color.Red("Failed to understand you, retry...")
+		//color.Red("Failed to understand you, retry...")
+		fmt.Println(red + "Failed to understand you, retry..." + reset)
 		goto ret
 	}
 	if args[0] == "--resume" {
