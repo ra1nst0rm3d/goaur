@@ -48,6 +48,7 @@ func Start(args ...string) (p *os.Process, err error) {
 	return nil, err
 }
 
+//---------------------MAIN FUNCTION-------------------------
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
@@ -63,18 +64,19 @@ func main() {
 	if len(args) != 0 && args[0] == "--resume" {
 		goto makepkg
 	}
+	//--------------------CONNECTING TO RPC------------------------
 	response, err = http.Get(rpc + args[0])
 	if err != nil {
 		fmt.Println("[ERR] Cannot connect to RPC interface. Check ur Internet connection")
 	}
 	buf.ReadFrom(response.Body)
 	json = buf.String()
-	// -------------------------------------------------------
+	//----------------SWAP TO JSON----------------------------
 
 	count = gjson.Get(json, "resultcount").Int()
 	fmt.Println("All results:", count)
 	fmt.Println()
-	// -------------------------------------------------------
+	//----------------PARSING---------------------------------
 	for i := 0; int64(i) < count; i++ {
 		fmt.Print(i, ". ")
 		str := "results." + strconv.Itoa(i) + ".Name"
@@ -116,16 +118,19 @@ func main() {
 	// --------------------------------------------------------------
 makepkg:
 	os.Chdir(dirname)
-	fmt.Print(green + "Maybe you want to edit PKGBUILD?[y/n] " + reset)
+	fmt.Print(green + "Maybe you want to edit PKGBUILD?[y/N] " + reset)
 ret:
 	fmt.Scanf("%s", &url)
-	if url == "y" {
+	switch url {
+	case "":
+		break
+	case "y":
 		if proc, err := Start("nano", "PKGBUILD"); err == nil {
 			proc.Wait()
 		}
-	} else if url != "n" {
-		//color.Red("Failed to understand you, retry...")
-		fmt.Println(red + "Failed to understand you, retry..." + reset)
+		break
+	default:
+		fmt.Print(red + "Failed to understand you, retry: " + reset)
 		goto ret
 	}
 	if args[0] == "--resume" {
