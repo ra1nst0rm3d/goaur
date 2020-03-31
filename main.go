@@ -150,6 +150,7 @@ ret:
 		break
 	default:
 		fmt.Print(red + "Failed to understand you, retry: " + reset)
+		url = ""
 		goto ret
 	}
 	if args[0] == "--resume" {
