@@ -142,7 +142,6 @@ func main() {
 	}
 	h.Release()
 	fmt.Println(" ")
-	return
 	// --------------------CHOOSING----------------------------------
 	fmt.Print("Choose once [0-", count-1, "]: ")
 	fmt.Scanf("%d", &i)
