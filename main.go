@@ -62,6 +62,7 @@ func main() {
 	var dst []byte
 	var h *alpm.Handle
 	var db *alpm.DB
+	var data *os.File
 	if len(args) != 0 && args[0] == "--resume" {
 		goto makepkg
 	}
@@ -105,13 +106,13 @@ func main() {
 		fmt.Println(green + fastjson.GetString(dst, "results", strconv.Itoa(i), "Version") + reset)
 		timestamp := strconv.Itoa(fastjson.GetInt(dst, "results", strconv.Itoa(i), "OutOfDate"))
 		time, err := stringToTime(timestamp)
-		if err != nil {
+		if timestamp == strconv.Itoa(0) || err != nil {
 			fmt.Println("Out of date: none")
 		} else {
 			fmt.Print("Out of date: ")
 			fmt.Println(red + time.String() + reset)
 		}
-		timestamp = fastjson.GetString(dst, "results", strconv.Itoa(i), "LastModified")
+		timestamp = strconv.Itoa(fastjson.GetInt(dst, "results", strconv.Itoa(i), "LastModified"))
 		time, _ = stringToTime(timestamp)
 		fmt.Print("Last modified: ")
 		fmt.Println(green + time.String() + reset)
@@ -136,6 +137,8 @@ ret:
 	fmt.Scanf("%s", &url)
 	switch url {
 	case "":
+		break
+	case "n":
 		break
 	case "y":
 		if proc, err := Start("nano", "PKGBUILD"); err == nil {
