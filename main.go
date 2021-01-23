@@ -62,7 +62,6 @@ func main() {
 	var dst []byte
 	var h *alpm.Handle
 	var db *alpm.DB
-	var data *os.File
 	if len(args) != 0 && args[0] == "--resume" {
 		goto makepkg
 	}
