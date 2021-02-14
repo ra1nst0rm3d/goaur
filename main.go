@@ -154,7 +154,7 @@ ret:
 			proc.Wait()
 		}
 	} else {
-		if proc, err := Start("makepkg", "-i", "-s"); err == nil {
+		if proc, err := Start("makepkg", "-sirc", "--skippgpcheck"); err == nil {
 			proc.Wait()
 		}
 	}
